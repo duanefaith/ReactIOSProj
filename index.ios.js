@@ -5,6 +5,7 @@
  */
 import React, { Component } from 'react';
 import {
+  NativeModules,
   AppRegistry,
   StyleSheet,
   TouchableOpacity,
@@ -13,6 +14,7 @@ import {
   Navigator
 } from 'react-native';
 import FirstPage from './js/ios/first_page';
+import {LocalSetting} from './js/common/config';
 
 export default class ReactIOSProj extends Component {
   constructor(props) {
@@ -20,6 +22,23 @@ export default class ReactIOSProj extends Component {
   }
 
   render() {
+    let promise = new Promise((resolver, rejector) => {
+      NativeModules.RNBridge.getBundleId((error, bundleId) => {
+        let params = {};
+        params.appId = LocalSetting.appId;
+        params.bundleId = bundleId;
+        resolver(params);
+      });
+    }).then(params => {
+      return (resolver, rejector) => {
+        NativeModules.RNBridge.getAppVersion((error, appVersion) => {
+          params.version = appVersion;
+          resolver(params);
+        })
+      };
+    }).then(params => {
+      console.log(params);
+    });
     let navigationBarRouteMapper = {
       LeftButton: (route, navigator, index, navState) => {
         if (index > 0) {
