@@ -22,22 +22,19 @@ export default class ReactIOSProj extends Component {
   }
 
   render() {
-    let promise = new Promise((resolver, rejector) => {
-      NativeModules.RNBridge.getBundleId((error, bundleId) => {
-        let params = {};
-        params.appId = LocalSetting.appId;
-        params.bundleId = bundleId;
-        resolver(params);
-      });
-    }).then(params => {
-      return (resolver, rejector) => {
+    Promise.all([
+      new Promise((resolver, rejector) => {
+        NativeModules.RNBridge.getBundleId((error, bundleId) => {
+          resolver(bundleId);
+        });
+      }),
+      new Promise((resolver, rejector) => {
         NativeModules.RNBridge.getAppVersion((error, appVersion) => {
-          params.version = appVersion;
-          resolver(params);
-        })
-      };
-    }).then(params => {
-      console.log(params);
+          resolver(appVersion);
+        });
+      })
+    ]).then(values => {
+      console.log(values);
     });
     let navigationBarRouteMapper = {
       LeftButton: (route, navigator, index, navState) => {
